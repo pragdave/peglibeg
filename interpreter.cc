@@ -1,4 +1,5 @@
 #include <string>
+#include <functional>
 #include "ast_node.h"
 #include "interpreter.h"
 
