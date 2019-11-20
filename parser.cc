@@ -10,14 +10,46 @@ using namespace peg;
 using namespace std;
 
 auto grammar = R"(
-        program <-  expr+
-        expr    <-  term ( add_op _ term )*
-        term    <-  primary ( mul_op _ primary )*
-        primary <-  number / '(' _ expr ')' _
-        add_op  <-  '+' / '-'
-        mul_op  <-  '*' / '/'
-        number  <-  < [0-9]+ > _
-        ~_      <-  [ \t\r\n]*
+	program                         <-  ( statement (_)? )*
+        statement                       <-  ( vDec 
+                                        /   assignment 
+                                        /   expr 
+                                        /   comment)+
+        vDec                            <-  'let' _ variable_declaration
+        variable_declaration            <-  decl (_)? (',' (_)? decl)*
+        decl                            <-  identifier (_)? ('=' (_)? expr)?
+        assignment                      <-  identifier (_)? '=' (_)? expr
+        boolean_expression              <-  arithmetic_expression (_)? relop (_)? arithmetic_expression
+        arithmetic_expression           <-  mult_term (_)? add_op (_)? arithmetic_expression 
+                                        /   mult_term
+        mult_term                       <-  primary (_)? mul_op (_)? mult_term 
+                                        /   primary
+        expr                            <-  function_definition
+                                        /   ifexpression
+                                        /   boolean_expression 
+                                        /   arithmetic_expression
+        function_definition             <-  'fn' (_)? param_list (_)? block
+        param_list                      <-  '(' (_)? identifier ( ',' (_)? identifier)* ')' 
+                                        /   '(' (_)? ')'
+        functioncall                    <-  'print' (_)? '(' (_)? call_arguments (_)? ')'
+                                        /   variablereference (_)? '(' (_)? call_arguments (_)? ')'
+        call_arguments                  <-  ((_)? expr (_)? (',' (_)? expr)*)?
+        block                           <-  '{' ((_)? statement (_)?)* '}'
+        ifexpression                    <-  'if' (_)? expr (_)? block (_)? elseexpression (_)?
+        elseexpression                  <-  ('else' (_)? block)?
+        variablereference               <-  identifier
+        primary                         <-  number
+                                        /   functioncall
+                                        /   variablereference
+                                        /   '(' (_)? arithmetic_expression (_)? ')'
+        comment                         <-  '#' [''""``-+0-9|a-zA-Z=>< ]* '\n'?
+        ~_                              <-  [ \t\r\n]*
+        ~__                             <-  ![a-zA-Z0-9] _
+        identifier                      <-  < [a-z][a-zA-Z0-9'_']* >
+        number                         	<-  < ('-')? [0-9]+ > 
+        add_op                          <-  < '+' / '-' > 
+        mul_op                          <-  < '*' / '/' > 
+        relop                           <-  < '==' / '!=' / '>=' / '>' / '<=' / '<' >
     )";
 
 class Visitor;
@@ -59,33 +91,128 @@ AstNode *bin_op(const SemanticValues &sv)
         AstNode *right = sv[i + 1].get<ParseTreeNode>().get();
         string op = sv[i].get<ParseTreeNode>().get()->to_string();
         left = new BinopNode(left, op, right);
+	cout << left << " : " << op << " : " << right << endl;
     }
     return left;
 };
 
 void setup_ast_generation(parser &parser)
 {
-    parser["expr"] = [](const SemanticValues &sv) {
-        cout << "expr: " << sv.str() << endl;
-        AstNode *n = bin_op(sv);
-        return ParseTreeNode(n);
+
+    /*parser["vDec"] = [](const SemanticValues &sv) {
+	would remove the let maybe? unsure
+	
+    };*/
+
+    /*parser["variable_declaration"] = [](const SemanticValues &sv) {
+	loop through to run all decl maybe?
+	
+    };*/
+
+    /*parser["decl"] = [](const SemanticValues &sv) {
+	bind identifier left node to value right node
+	
+    };*/
+
+    /*parser["assignment"] = [](const SemanticValues &sv) {
+	bind identifier left node to value right node
+	
+    };*/
+
+    parser["boolean_expression"] = [](const SemanticValues &sv) {
+	cout << "bool" << endl;
+	AstNode *n = bin_op(sv);
+	return ParseTreeNode(n);
+	
+    };
+
+    parser["arithmetic_expression"] = [](const SemanticValues &sv) {
+	cout << "arith" << endl;
+	AstNode *n = bin_op(sv);
+	return ParseTreeNode(n);
+	
+    };
+
+    parser["mult_term"] = [](const SemanticValues &sv) {
+	cout << "mult_term" << endl;
+	AstNode *n = bin_op(sv);
+	return ParseTreeNode(n);
+	
+    };
+
+	    /*parser["expr"] = [](const SemanticValues &sv) {
+		cout << "expr: " << sv.str() << endl;
+		AstNode *n = bin_op(sv);
+		return ParseTreeNode(n);
+	    };*/
+
+    /*parser["function_definition"] = [](const SemanticValues &sv) {
+	would remove fn and things maybe?
+	
+    };*/
+
+    /*parser["param_list"] = [](const SemanticValues &sv) {
+	run through all identifiers?
+	
+    };*/
+
+    /*parser["functioncall"] = [](const SemanticValues &sv) {
+	run function using call arguments
+	
+    };*/
+
+    /*parser["call_arguments"] = [](const SemanticValues &sv) {
+	bind values to function name values in new scope
+	
+    };*/
+
+    /*parser["block"] = [](const SemanticValues &sv) {
+	
+	
+    };*/
+
+    /*parser["ifexpression"] = [](const SemanticValues &sv) {
+	
+	
+    };*/
+
+    /*parser["elseexpression"] = [](const SemanticValues &sv) {
+	
+	
+    };*/
+
+    /*parser["variablereference"] = [](const SemanticValues &sv) {
+	
+	
+    };*/
+		    /*parser["comment"] = [](const SemanticValues &sv) {
+			
+			
+		    };*/
+
+    /*parser["identifier"] = [](const SemanticValues &sv) {
+	make new identifier node?
+	
+    };*/
+
+    parser["number"] = [](const SemanticValues &sv) {
+	cout << "number" << endl;
+        return ParseTreeNode(new IntegerNode(atoi(sv.c_str())));
     };
 
     parser["add_op"] = [](const SemanticValues &sv) {
+	cout << "addop" << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
     parser["mul_op"] = [](const SemanticValues &sv) {
+	cout << "mulop" << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
-    parser["term"] = [](const SemanticValues &sv) {
-        AstNode *n = bin_op(sv);
-        return ParseTreeNode(n);
-    };
-
-    parser["number"] = [](const SemanticValues &sv) {
-        return ParseTreeNode(new IntegerNode(atoi(sv.c_str())));
+    parser["relop"] = [](const SemanticValues &sv) {
+	cout << "relop" << endl;
+	return ParseTreeNode(new OpNode(sv.str()));
     };
 }
 
