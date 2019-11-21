@@ -77,3 +77,14 @@ public:
     int accept(Visitor *visitor);
 };
 
+////////////////////
+// IfElse
+/*
+class IfElseNode : public AstNode {
+	//
+public:
+	IfElseNode();
+	std::string to_string();
+	int accept(Visitor *visitor);
+};
+*/

@@ -11,7 +11,7 @@ using namespace peg;
 using namespace std;
 
 auto grammar = R"(
-	program                         <-  ( statement (_)? )*
+		program                         <-  ( statement (_)? )*
         statement                       <-  ( vDec 
                                         /   assignment 
                                         /   expr 
@@ -21,10 +21,8 @@ auto grammar = R"(
         decl                            <-  identifier (_)? ('=' (_)? expr)?
         assignment                      <-  identifier (_)? '=' (_)? expr
         boolean_expression              <-  arithmetic_expression (_)? relop (_)? arithmetic_expression
-        arithmetic_expression           <-  mult_term _ add_op _ arithmetic_expression 
-                                        /   mult_term
-        mult_term                       <-  primary _ mul_op _ mult_term 
-                                        /   primary
+        arithmetic_expression           <-  mult_term (_ add_op _ mult_term )*
+        mult_term                       <-  primary (_ mul_op _ primary)* 
         expr                            <-  function_definition
                                         /   ifexpression
                                         /   boolean_expression 
@@ -36,8 +34,7 @@ auto grammar = R"(
                                         /   variablereference (_)? '(' (_)? call_arguments (_)? ')'
         call_arguments                  <-  ((_)? expr (_)? (',' (_)? expr)*)?
         block                           <-  '{' ((_)? statement (_)?)* '}'
-        ifexpression                    <-  'if' (_)? expr (_)? block (_)? elseexpression (_)?
-        elseexpression                  <-  ('else' (_)? block)?
+        ifexpression                    <-  'if' (_)? expr (_)? block (_)? ('else' (_)? block)? (_)?
         variablereference               <-  identifier
         primary                         <-  number
                                         /   functioncall
@@ -46,7 +43,7 @@ auto grammar = R"(
         comment                         <-  '#' [''""``-+0-9|a-zA-Z=>< ]* '\n'?
         ~_                              <-  [ \t\r\n]*
         ~__                             <-  ![a-zA-Z0-9] _
-        identifier                      <-  < [a-z][a-zA-Z0-9'_']* >
+        identifier                      <-  'x'
         number                         	<-  < ('-')? [0-9]+ > 
         add_op                          <-  < '+' / '-' > 
         mul_op                          <-  < '*' / '/' > 
@@ -86,17 +83,24 @@ public:
 AstNode *bin_op(const SemanticValues &sv)
 {
     AstNode *left = sv[0].get<ParseTreeNode>().get();
+    cout << left->to_string() << " : ";
 
     for (auto i = 1u; i < sv.size(); i += 2)
     {
         AstNode *right = sv[i + 1].get<ParseTreeNode>().get();
         string op = sv[i].get<ParseTreeNode>().get()->to_string();
         left = new BinopNode(left, op, right);
-	cout << left->to_string() << " : " << op << " : " << right->to_string() << endl;
+		cout << op << " : " << right->to_string() << endl;
     }
     return left;
 };
 
+/*
+AstNode *ifElse(const SemanticValues &sv) {
+	AstNode *left =  sv[0].get<ParseTreeNode>().get();
+	return new IfElseNode();
+}
+*/
 void setup_ast_generation(parser &parser)
 {
 
@@ -116,32 +120,32 @@ void setup_ast_generation(parser &parser)
     };*/
 
     parser["assignment"] = [](const SemanticValues &sv) {
-	//cout << sv.to_string() << endl;
-	//std::string left = sv[0].to_string();
-	//int right = std::stoi(sv[2].get<ParseTreeNode>().get()->to_string());
-	//cout << left << " " << right << endl;
-	return ParseTreeNode(new Assigner("hello", 7));
+		cout << sv[0].get<ParseTreeNode>().get()->to_string() << endl;
+		//std::string left = sv[0].to_string();
+		//int right = std::stoi(sv[2].get<ParseTreeNode>().get()->to_string());
+		//cout << left << " " << right << endl;
+		return ParseTreeNode(new Assigner("hello", 7));
 	
     };
 
     parser["boolean_expression"] = [](const SemanticValues &sv) {
-	cout << "bool" << endl;
-	AstNode *n = bin_op(sv);
-	return ParseTreeNode(n);
+		cout << "bool" << endl;
+		AstNode *n = bin_op(sv);
+		return ParseTreeNode(n);
 	
     };
 
     parser["arithmetic_expression"] = [](const SemanticValues &sv) {
-	cout << "arith" << endl;
-	AstNode *n = bin_op(sv);
-	return ParseTreeNode(n);
+		cout << "arith" << endl;
+		AstNode *n = bin_op(sv);
+		return ParseTreeNode(n);
 	
     };
 
     parser["mult_term"] = [](const SemanticValues &sv) {
-	cout << "mult_term" << endl;
-	AstNode *n = bin_op(sv);
-	return ParseTreeNode(n);
+		cout << "mult_term" << endl;
+		AstNode *n = bin_op(sv);
+		return ParseTreeNode(n);
 	
     };
 
@@ -166,23 +170,20 @@ void setup_ast_generation(parser &parser)
     };*/
 
     /*parser["block"] = [](const SemanticValues &sv) {
-	
+		
 	
     };*/
 
     /*parser["ifexpression"] = [](const SemanticValues &sv) {
-	
-	
+		cout << "ifexp" << endl;
+		AstNode *n = ifElse(sv);
+		return ParseTreeNode(n);
+
     };*/
 
-    /*parser["elseexpression"] = [](const SemanticValues &sv) {
-	
-	
-    };*/
-
-    parser["variablereference"] = [](const SemanticValues &sv) {
-	cout << "varref" << endl;	
-	return ParseTreeNode(new VariableValue(sv.c_str()));
+    parser["variablereference"] = [](const SemanticValues &sv) {	
+		cout << "varref" << sv.c_str() << endl;	
+		return ParseTreeNode(new VariableValue(sv.c_str()));
 	
     };
 
@@ -192,23 +193,23 @@ void setup_ast_generation(parser &parser)
     };*/
 
     parser["number"] = [](const SemanticValues &sv) {
-	cout << "number" << endl;
+		cout << "number" << endl;
         return ParseTreeNode(new IntegerNode(atoi(sv.c_str())));
     };
 
     parser["add_op"] = [](const SemanticValues &sv) {
-	cout << "addop" << endl;
+		cout << "addop" << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
     parser["mul_op"] = [](const SemanticValues &sv) {
-	cout << "mulop" << endl;
+		cout << "mulop" << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
     parser["relop"] = [](const SemanticValues &sv) {
-	cout << "relop" << endl;
-	return ParseTreeNode(new OpNode(sv.str()));
+		cout << "relop" << endl;
+		return ParseTreeNode(new OpNode(sv.str()));
     };
 }
 

@@ -86,3 +86,19 @@ std::string Assigner::to_string() {
 int Assigner::accept(Visitor *visitor) {
     return visitor->evaluate_assignment(this, name, value);
 }
+
+////////////////////
+// IfElse
+/*
+IfElseNode::IfElseNode() {
+
+}
+
+std::string IfElseNode::to_string() {
+	return "hello";
+}
+
+int IfElseNode::accept(Visitor *visitor) {
+	return 1;
+}
+*/
