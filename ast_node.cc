@@ -55,3 +55,50 @@ std::string OpNode::to_string()
 {
   return op;
 }
+
+////////////////////
+//  VariableValue
+
+VariableValue::VariableValue(std::string n) {
+    name = n;
+} 
+
+std::string VariableValue::to_string() {
+    return name;
+}
+
+int VariableValue::accept(Visitor *visitor) {
+    return visitor->evaluate_varref(this, name);
+}
+
+////////////////////
+//  Assigner
+
+Assigner::Assigner(std::string n, int val) {
+    name = n;
+    value = val;
+}
+
+std::string Assigner::to_string() {
+    return "name : " + name + " value : " + std::to_string(value) + "\n"; 
+}
+
+int Assigner::accept(Visitor *visitor) {
+    return visitor->evaluate_assignment(this, name, value);
+}
+
+////////////////////
+// IfElse
+/*
+IfElseNode::IfElseNode() {
+
+}
+
+std::string IfElseNode::to_string() {
+	return "hello";
+}
+
+int IfElseNode::accept(Visitor *visitor) {
+	return 1;
+}
+*/
