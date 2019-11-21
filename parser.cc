@@ -18,7 +18,7 @@ auto grammar = R"(
                                         /   comment)+
         vDec                            <-  'let' _ variable_declaration
         variable_declaration            <-  decl (_)? (',' (_)? decl)*
-        decl                            <-  identifier (_)? ('=' (_)? expr)?
+        decl                            <-  identifier (_)? '=' (_)? expr
         assignment                      <-  identifier (_)? '=' (_)? expr
         boolean_expression              <-  arithmetic_expression (_)? relop (_)? arithmetic_expression
         arithmetic_expression           <-  mult_term (_ add_op _ mult_term )*
@@ -36,14 +36,14 @@ auto grammar = R"(
         block                           <-  '{' ((_)? statement (_)?)* '}'
         ifexpression                    <-  'if' (_)? expr (_)? block (_)? ('else' (_)? block)? (_)?
         variablereference               <-  identifier
-        primary                         <-  number
+        primary                         <-  variablereference
                                         /   functioncall
-                                        /   variablereference
+                                        /   number
                                         /   '(' (_)? arithmetic_expression (_)? ')'
         comment                         <-  '#' [''""``-+0-9|a-zA-Z=>< ]* '\n'?
         ~_                              <-  [ \t\r\n]*
         ~__                             <-  ![a-zA-Z0-9] _
-        identifier                      <-  'x'
+        identifier                      <-  < [a-z] >
         number                         	<-  < ('-')? [0-9]+ > 
         add_op                          <-  < '+' / '-' > 
         mul_op                          <-  < '*' / '/' > 
@@ -104,32 +104,41 @@ AstNode *ifElse(const SemanticValues &sv) {
 void setup_ast_generation(parser &parser)
 {
 
-    /*parser["vDec"] = [](const SemanticValues &sv) {
-	would remove the let maybe? unsure
+    parser["decl"] = [](const SemanticValues &sv) {
+		cout << "decl" << endl;
+		cout << sv.str() << endl;
+		std::string left = sv.str();
+		std::string name = "";
+		int i = 0;
+		while (left[i] != '=') {
+			name = name + left[i];
+			i++;
+		}
+		int num = stoi(left.substr(i+1, left.length()));
+		cout << "name is " << name << " value is " << num << endl;
+		return ParseTreeNode(new Assigner(name, num));
 	
-    };*/
-
-    /*parser["variable_declaration"] = [](const SemanticValues &sv) {
-	loop through to run all decl maybe?
-	
-    };*/
-
-    /*parser["decl"] = [](const SemanticValues &sv) {
-	bind identifier left node to value right node
-	
-    };*/
+    };
 
     parser["assignment"] = [](const SemanticValues &sv) {
-		cout << sv[0].get<ParseTreeNode>().get()->to_string() << endl;
-		//std::string left = sv[0].to_string();
-		//int right = std::stoi(sv[2].get<ParseTreeNode>().get()->to_string());
-		//cout << left << " " << right << endl;
-		return ParseTreeNode(new Assigner("hello", 7));
+		cout << "assignment" << endl;
+		cout << sv.str() << endl;
+		std::string left = sv.str();
+		std::string name = "";
+		int i = 0;
+		while (left[i] != '=') {
+			name = name + left[i];
+			i++;
+		}
+		int num = stoi(left.substr(i+1, left.length()));
+		cout << "name is " << name << " value is " << num << endl;
+		return ParseTreeNode(new Assigner(name, num));
 	
     };
 
     parser["boolean_expression"] = [](const SemanticValues &sv) {
 		cout << "bool" << endl;
+		cout << sv.str() << endl;
 		AstNode *n = bin_op(sv);
 		return ParseTreeNode(n);
 	
@@ -137,6 +146,7 @@ void setup_ast_generation(parser &parser)
 
     parser["arithmetic_expression"] = [](const SemanticValues &sv) {
 		cout << "arith" << endl;
+		cout << sv.str() << endl;
 		AstNode *n = bin_op(sv);
 		return ParseTreeNode(n);
 	
@@ -144,6 +154,7 @@ void setup_ast_generation(parser &parser)
 
     parser["mult_term"] = [](const SemanticValues &sv) {
 		cout << "mult_term" << endl;
+		cout << sv.str() << endl;
 		AstNode *n = bin_op(sv);
 		return ParseTreeNode(n);
 	
@@ -170,8 +181,10 @@ void setup_ast_generation(parser &parser)
     };*/
 
     /*parser["block"] = [](const SemanticValues &sv) {
-		
-	
+		ParseTreeNode n = ParseTreeNode();
+		n.get()->accept(new Interpreter());
+		return n;
+
     };*/
 
     /*parser["ifexpression"] = [](const SemanticValues &sv) {
@@ -181,34 +194,34 @@ void setup_ast_generation(parser &parser)
 
     };*/
 
-    parser["variablereference"] = [](const SemanticValues &sv) {	
-		cout << "varref" << sv.c_str() << endl;	
-		return ParseTreeNode(new VariableValue(sv.c_str()));
+    parser["variablereference"] = [](const SemanticValues &sv) {
+		cout << "valref " << sv.str() << endl;
+		cout << sv.str() << endl;
+		return ParseTreeNode(new VariableValue(sv.str()));
 	
     };
 
-    /*parser["identifier"] = [](const SemanticValues &sv) {
-	make new identifier node?
-	
-    };*/
-
     parser["number"] = [](const SemanticValues &sv) {
 		cout << "number" << endl;
+		cout << sv.str() << endl;
         return ParseTreeNode(new IntegerNode(atoi(sv.c_str())));
     };
 
     parser["add_op"] = [](const SemanticValues &sv) {
 		cout << "addop" << endl;
+		cout << sv.str() << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
     parser["mul_op"] = [](const SemanticValues &sv) {
 		cout << "mulop" << endl;
+		cout << sv.str() << endl;
         return ParseTreeNode(new OpNode(sv.str()));
     };
 
     parser["relop"] = [](const SemanticValues &sv) {
 		cout << "relop" << endl;
+		cout << sv.str() << endl;
 		return ParseTreeNode(new OpNode(sv.str()));
     };
 }

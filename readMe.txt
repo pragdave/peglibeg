@@ -1,8 +1,28 @@
 11/20/2019 6:47
-	Ints work, comparisons work, expressions work with ints, as long as 
-	parans are not around the whole thing, variablereference half works
-	with variables, but not functions, and with math only works when it
-	is last in the equation
-		- Fix Equations with Parans
-		- Fix Equations with variables not last
-		- Fix assignment in general
+	Working:
+		- Ints
+		- Comparisons
+		- Expressions w/ints and no parans
+		- Variablereference
+			- half works with variables
+			- not functions
+			- math only works when last
+	Fix: 
+		- Equations with Parans
+		- Equations with variables not last
+		- Assignment in general
+
+11/21/2019 4:31
+	Working:
+		- Ints
+		- Comparisons
+		- Int math and expressions
+		- variablereference (not function calls)
+		- assignment not to math but single digit
+		- variable declaration without math
+	Fix:
+		- assignment and decl with math
+		- print more than one code statement results
+	Start/Issues:
+		- if/else
+		- block

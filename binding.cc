@@ -5,7 +5,11 @@ Binding::Binding () {
 }
 
 void Binding::set_variable(std::string name, int val) {
-    bindings.insert( std::pair<std::string, int>(name, val) );
+	if (bindings.find(name)->second) {
+		bindings.find(name)->second = val;
+	} else {
+    	bindings.insert( std::pair<std::string, int>(name, val) );
+	}
 }
 
 int Binding::get_variable_value(std::string name) {

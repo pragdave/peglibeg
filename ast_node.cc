@@ -80,7 +80,7 @@ Assigner::Assigner(std::string n, int val) {
 }
 
 std::string Assigner::to_string() {
-    return "name : " + name + " value : " + std::to_string(value) + "\n"; 
+    return "name : " + name + " value : " + std::to_string(value); 
 }
 
 int Assigner::accept(Visitor *visitor) {
