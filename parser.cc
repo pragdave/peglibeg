@@ -6,6 +6,7 @@
 #include "ast_node.h"
 #include "interpreter.h"
 
+
 using namespace peg;
 using namespace std;
 
@@ -20,9 +21,9 @@ auto grammar = R"(
         decl                            <-  identifier (_)? ('=' (_)? expr)?
         assignment                      <-  identifier (_)? '=' (_)? expr
         boolean_expression              <-  arithmetic_expression (_)? relop (_)? arithmetic_expression
-        arithmetic_expression           <-  mult_term (_)? add_op (_)? arithmetic_expression 
+        arithmetic_expression           <-  mult_term _ add_op _ arithmetic_expression 
                                         /   mult_term
-        mult_term                       <-  primary (_)? mul_op (_)? mult_term 
+        mult_term                       <-  primary _ mul_op _ mult_term 
                                         /   primary
         expr                            <-  function_definition
                                         /   ifexpression
@@ -91,7 +92,7 @@ AstNode *bin_op(const SemanticValues &sv)
         AstNode *right = sv[i + 1].get<ParseTreeNode>().get();
         string op = sv[i].get<ParseTreeNode>().get()->to_string();
         left = new BinopNode(left, op, right);
-	cout << left << " : " << op << " : " << right << endl;
+	cout << left->to_string() << " : " << op << " : " << right->to_string() << endl;
     }
     return left;
 };
@@ -114,10 +115,14 @@ void setup_ast_generation(parser &parser)
 	
     };*/
 
-    /*parser["assignment"] = [](const SemanticValues &sv) {
-	bind identifier left node to value right node
+    parser["assignment"] = [](const SemanticValues &sv) {
+	//cout << sv.to_string() << endl;
+	//std::string left = sv[0].to_string();
+	//int right = std::stoi(sv[2].get<ParseTreeNode>().get()->to_string());
+	//cout << left << " " << right << endl;
+	return ParseTreeNode(new Assigner("hello", 7));
 	
-    };*/
+    };
 
     parser["boolean_expression"] = [](const SemanticValues &sv) {
 	cout << "bool" << endl;
@@ -139,12 +144,6 @@ void setup_ast_generation(parser &parser)
 	return ParseTreeNode(n);
 	
     };
-
-	    /*parser["expr"] = [](const SemanticValues &sv) {
-		cout << "expr: " << sv.str() << endl;
-		AstNode *n = bin_op(sv);
-		return ParseTreeNode(n);
-	    };*/
 
     /*parser["function_definition"] = [](const SemanticValues &sv) {
 	would remove fn and things maybe?
@@ -181,14 +180,11 @@ void setup_ast_generation(parser &parser)
 	
     };*/
 
-    /*parser["variablereference"] = [](const SemanticValues &sv) {
+    parser["variablereference"] = [](const SemanticValues &sv) {
+	cout << "varref" << endl;	
+	return ParseTreeNode(new VariableValue(sv.c_str()));
 	
-	
-    };*/
-		    /*parser["comment"] = [](const SemanticValues &sv) {
-			
-			
-		    };*/
+    };
 
     /*parser["identifier"] = [](const SemanticValues &sv) {
 	make new identifier node?

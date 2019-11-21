@@ -52,3 +52,28 @@ public:
     std::string to_string();
     int accept(Visitor *visitor);
 };
+
+////////////////////
+//  VariableValue
+
+class VariableValue : public AstNode {
+    std::string name;
+
+public:
+    VariableValue(std::string n);
+    std::string to_string();
+    int accept(Visitor *visitor);
+};
+
+////////////////////
+//  Assigner
+
+class Assigner : public AstNode {
+    std::string name;
+    int value;
+public:
+    Assigner(std::string n, int val);
+    std::string to_string();
+    int accept(Visitor *visitor);
+};
+

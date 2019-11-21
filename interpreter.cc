@@ -16,4 +16,11 @@ int Interpreter::evaluate_binop(AstNode *node, AstNode *left, std::string op, As
   return eval_op[op](lval, rval);
 }
 
+int Interpreter::evaluate_varref(AstNode *node, std::string name) {
+    return bindings.get_variable_value(name);
+}
 
+int Interpreter::evaluate_assignment(AstNode *node, std::string left, int right) {
+    bindings.set_variable(left, right);
+    return 1;
+}
