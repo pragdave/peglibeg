@@ -2,12 +2,12 @@
 #include <map>
 #include <iostream>
 
-class Binding {
-    
-    std::map<std::string, int> bindings;
+using namespace std;
 
-    public:
-		Binding();
-		void set_variable(std::string, int val);
-		int get_variable_value(std::string name);
+class Binding {
+	map<string, int> bindings;
+public:
+	Binding();
+	void set_variable(string, int val);
+	int get_variable_value(string name);
 };

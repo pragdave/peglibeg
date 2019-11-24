@@ -1,19 +1,20 @@
 #include "binding.h"
 
+using namespace std;
+
 Binding::Binding () {
-	bindings.insert( std::pair<std::string, int>("x", 5) );
+	bindings.insert( pair<string, int>("x", 5) );
 }
 
-void Binding::set_variable(std::string name, int val) {
-
-	std::map<std::string, int>::iterator it = bindings.find(name);
+void Binding::set_variable(string name, int val) {
+	map<string, int>::iterator it = bindings.find(name);
 	if (it != bindings.end()) {
 		it->second = val;
 	} else {
-    	bindings.insert( std::pair<std::string, int>(name, val) );
+		bindings.insert( pair<string, int>(name, val) );
 	}
 }
 
-int Binding::get_variable_value(std::string name) {
-    return bindings.find(name)->second;
+int Binding::get_variable_value(string name) {
+	return bindings.find(name)->second;
 }
