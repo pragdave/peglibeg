@@ -74,31 +74,37 @@ int VariableValue::accept(Visitor *visitor) {
 ////////////////////
 //  Assigner
 
-Assigner::Assigner(std::string n, int val) {
-    name = n;
-    value = val;
+Assigner::Assigner(AstNode *pleft, std::string op, AstNode *pright) {
+    left = pleft;
+	op = op;
+	right = pright;
 }
 
 std::string Assigner::to_string() {
-    return "name : " + name + " value : " + std::to_string(value); 
+	return "(" + left->to_string() + op + right->to_string() + ")";
 }
 
 int Assigner::accept(Visitor *visitor) {
-    return visitor->evaluate_assignment(this, name, value);
+    return visitor->evaluate_assignment(this, left, op, right);
 }
 
 ////////////////////
 // IfElse
-/*
-IfElseNode::IfElseNode() {
 
+IfElseNode::IfElseNode(AstNode *pleft, AstNode *pright, AstNode *pel) {
+	left = pleft;
+	right = pright;
+	el = pel;
 }
 
 std::string IfElseNode::to_string() {
-	return "hello";
+	std::string ret = "if is : " + left->to_string() + " code is : " + right->to_string();
+	if (el != nullptr)
+		ret = ret + " else is : " + el->to_string() + "\n";
+	return ret;
 }
 
 int IfElseNode::accept(Visitor *visitor) {
-	return 1;
+	return visitor->evaluate_if_expr(this, left, right, el);
 }
-*/
+

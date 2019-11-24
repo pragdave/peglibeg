@@ -5,8 +5,10 @@ Binding::Binding () {
 }
 
 void Binding::set_variable(std::string name, int val) {
-	if (bindings.find(name)->second) {
-		bindings.find(name)->second = val;
+
+	std::map<std::string, int>::iterator it = bindings.find(name);
+	if (it != bindings.end()) {
+		it->second = val;
 	} else {
     	bindings.insert( std::pair<std::string, int>(name, val) );
 	}

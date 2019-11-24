@@ -26,3 +26,17 @@
 	Start/Issues:
 		- if/else
 		- block
+
+11/23/2019 8:33
+	Working:
+		- Ints
+		- Comparisons
+		- variablereference (not function calls)
+		- assignments (not function calls)
+		- variable declaration
+		- more than one code statement result (not in blocks)
+		- if/else with one statement in blocks
+	Fix:
+		- Block codes
+	Start/Issues:
+		- Functions

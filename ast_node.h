@@ -69,22 +69,25 @@ public:
 //  Assigner
 
 class Assigner : public AstNode {
-    std::string name;
-    int value;
+    AstNode *left;
+    std::string op;
+    AstNode *right;
 public:
-    Assigner(std::string n, int val);
+    Assigner(AstNode *pleft, std::string op, AstNode *pright);
     std::string to_string();
     int accept(Visitor *visitor);
 };
 
 ////////////////////
 // IfElse
-/*
+
 class IfElseNode : public AstNode {
-	//
+	AstNode *left;
+	AstNode *right;
+	AstNode *el;
 public:
-	IfElseNode();
+	IfElseNode(AstNode *pleft, AstNode *pright, AstNode *pel);
 	std::string to_string();
 	int accept(Visitor *visitor);
 };
-*/
+
