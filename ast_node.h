@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 #include "visitor.h"
 
 using namespace std;
@@ -81,6 +83,18 @@ class IfElseNode : public AstNode {
 	AstNode *el;
 public:
 	IfElseNode(AstNode *pleft, AstNode *pright, AstNode *pel);
+	string to_string();
+	int accept(Visitor *visitor);
+};
+
+////////////////////
+// Block
+
+class Block : public AstNode {
+	vector<AstNode*> nodes;
+	int numNodes;
+public:
+	Block(vector<AstNode*> ns, int nN);
 	string to_string();
 	int accept(Visitor *visitor);
 };

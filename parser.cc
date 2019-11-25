@@ -1,6 +1,7 @@
 #include <peglib.h>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 
 #include "visitor.h"
 #include "ast_node.h"
@@ -15,9 +16,7 @@ auto grammar = R"(
 		statement                       <-  ( vDec 
 						/   assignment 
 						/   expr )+
-		vDec                            <-  'let' _ variable_declaration
-		variable_declaration            <-  decl _ (',' _ decl)*
-		decl                            <-  identifier _ '=' _ expr
+		vDec                            <-  'let' _ (identifier _ '=' _ expr (',')?)*
 		assignment                      <-  identifier _ '=' _ expr
 		boolean_expression              <-  arithmetic_expression _ relop _ arithmetic_expression
 		arithmetic_expression           <-  mult_term (_ add_op _ mult_term )*
@@ -33,6 +32,7 @@ auto grammar = R"(
 						/   variablereference _ '(' _ call_arguments _ ')'
 		call_arguments                  <-  (_ expr _ (',' _ expr)*)?
 		block                           <-  '{' (_ statement _)* '}'
+		
 		ifexpression                    <-  'if' _ expr _ block _ ('else' _ block)? _
 		variablereference               <-  identifier
 		primary                         <-  variablereference
@@ -91,9 +91,19 @@ AstNode *ifElse(const SemanticValues &sv) {
 	return left;
 }
 
+AstNode *bind(const SemanticValues &sv) {
+	vector<AstNode*> vec;
+	int j = 0;
+	for (auto i = 0u; i < sv.size(); i+=1) {
+		vec.push_back(sv[i].get<ParseTreeNode>().get());
+		j++;
+	}
+	return new Block(vec, j);
+}
+
 void setup_ast_generation(parser &parser) {
 
-	parser["decl"] = [](const SemanticValues &sv) {
+	parser["vDec"] = [](const SemanticValues &sv) {
 		AstNode *n = assign(sv);
 		return ParseTreeNode(n);
 	};
@@ -157,22 +167,33 @@ void setup_ast_generation(parser &parser) {
 	
     };*/
 
-    /*parser["functioncall"] = [](const SemanticValues &sv) {
-	run function using call arguments
-	
-    };*/
+	/*parser["functioncall"] = [](const SemanticValues &sv) {
+		
+		
+	};*/
 
     /*parser["call_arguments"] = [](const SemanticValues &sv) {
 	bind values to function name values in new scope
 	
     };*/
 
-    /*parser["block"] = [](const SemanticValues &sv) {
-		ParseTreeNode n = ParseTreeNode();
-		n.get()->accept(new Interpreter());
-		return n;
+	parser["block"] = [](const SemanticValues &sv) {
+		AstNode *n = bind(sv);
+		/*ParseTreeNode val = ParseTreeNode(n);
+		Interpreter* I = new Interpreter();
+		val.get()->accept(I);
+		return val;*/
+		return ParseTreeNode(n);
+	};
 
-    };*/
+	parser["program"] = [](const SemanticValues &sv) {
+		AstNode *n = bind(sv);
+		ParseTreeNode val = ParseTreeNode(n);
+		Interpreter* I = new Interpreter();
+		val.get()->accept(I);
+		return val;
+	};
+
 }
 
 int main(int argc, const char **argv) {
@@ -185,7 +206,7 @@ int main(int argc, const char **argv) {
 	setup_ast_generation(parser);
 
 	ParseTreeNode val = ParseTreeNode();
-	Interpreter* I = new Interpreter();
+/*	Interpreter* I = new Interpreter();
 	for (int i = 1; i < argc; i++) {
 		auto expr = argv[i];
 		if (parser.parse(expr, val)) {
@@ -194,5 +215,12 @@ int main(int argc, const char **argv) {
 			cout << "syntax error..." << endl;
 			return -1;
 		}
+	}*/
+
+	auto expr = argv[1];
+	if (parser.parse(expr, val)) {
+		//cout << val.get()->to_string() << endl;
+	} else {
+		cout << "syntax error..." << endl;
 	}
 }

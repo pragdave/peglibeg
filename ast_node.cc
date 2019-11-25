@@ -27,7 +27,7 @@ BinopNode::BinopNode(AstNode *pleft, string pop, AstNode *pright) {
 }
 
 string BinopNode::to_string() {
-	return "(" + left->to_string() + op + right->to_string() + ")";
+	return "( " + left->to_string() + op + right->to_string() + " )";
 }
 
 int BinopNode::accept(Visitor *visitor) {
@@ -91,9 +91,10 @@ IfElseNode::IfElseNode(AstNode *pleft, AstNode *pright, AstNode *pel) {
 }
 
 string IfElseNode::to_string() {
-	string ret = "if is : " + left->to_string() + " code is : " + right->to_string();
+	string ret = "( " + left->to_string() + " : " + right->to_string();
 	if (el != nullptr)
-		ret = ret + " else is : " + el->to_string() + "\n";
+		ret = ret + " : " + el->to_string() + "\n";
+	ret = ret + " )";
 	return ret;
 }
 
@@ -101,3 +102,23 @@ int IfElseNode::accept(Visitor *visitor) {
 	return visitor->evaluate_if_expr(this, left, right, el);
 }
 
+////////////////////
+// Block
+
+Block::Block(vector<AstNode*> ns, int nN) {
+	nodes = ns;
+	numNodes = nN;
+}
+
+string Block::to_string() {
+	//string ret = "";
+	for (int i = 0; i < numNodes; i++) {
+	//	ret = nodes[i]->to_string();
+
+	}
+	return "hi";
+}
+
+int Block::accept(Visitor *visitor) {
+	return visitor->evaluate_block(this, nodes, numNodes);
+}

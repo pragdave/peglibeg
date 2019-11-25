@@ -40,3 +40,18 @@
 		- Block codes
 	Start/Issues:
 		- Functions
+
+11/24/2019 6:21
+	Working:
+		- Ints
+		- Comparisons
+		- variablereference (not function calls)
+		- assignments (not function calls)
+		- variable declaration
+		- more than one code statement result
+		- if/else
+	Fix:
+		- Printing w/ if/else prints statement twice
+	Start/Issues:
+		- Functions
+

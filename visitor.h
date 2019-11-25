@@ -16,4 +16,6 @@ public:
 		{ return 0; };     
 	virtual int evaluate_if_expr(AstNode *node, AstNode *left, AstNode *right, AstNode *el) 
 		{ return 0; };
+	virtual int evaluate_block(AstNode *node, vector<AstNode*> nodes, int numNodes)
+		{ return 0; };
 };
