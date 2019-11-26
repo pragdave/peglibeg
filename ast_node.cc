@@ -1,3 +1,6 @@
+#include <sstream>
+#include <iterator>
+
 #include "ast_node.h"
 
 using namespace std;
@@ -116,9 +119,60 @@ string Block::to_string() {
 	//	ret = nodes[i]->to_string();
 
 	}
-	return "hi";
+	return "block";
 }
 
 int Block::accept(Visitor *visitor) {
-	return visitor->evaluate_block(this, nodes, numNodes);
+	return visitor->evaluate_block(this, nodes);
+}
+
+vector<AstNode*> Block::getCode() {
+	return nodes;
+}
+
+////////////////////
+// FunCall
+
+FunCall::FunCall(vector<AstNode*> v, AstNode* funcD) {
+	block = funcD;
+	vars = v;
+}
+
+string FunCall::to_string() {
+	return "hi";
+}
+
+int FunCall::accept(Visitor *visitor) {
+	AstNode* funcD = visitor->find_func(block->to_string());
+
+	stringstream ss(funcD->to_string());
+	istream_iterator<string> begin(ss);
+	istream_iterator<string> end;
+	vector<string> vstrings(begin, end);
+
+	return visitor->evaluate_funcall(this, vstrings, vars, funcD->getBlock());
+}
+
+////////////////////
+// FunDef
+
+FunDef::FunDef(AstNode* b, vector<AstNode*> v) {
+	block = b;
+	vars = v;
+}
+
+string FunDef::to_string() {
+	string ret = "";
+	for (int i = 0; i < vars.size(); i++) {
+		ret = ret + vars[i]->to_string() + " ";
+	}
+	return ret;
+}
+
+int FunDef::accept(Visitor *visitor) {
+	return 0;
+}
+
+AstNode* FunDef::getBlock() {
+	return block;
 }
