@@ -25,23 +25,19 @@ auto grammar = R"(
 						/   ifexpression
 						/   boolean_expression 
 						/   arithmetic_expression
-		function_definition             <-  'fn' _ param_list _ block
-		param_list                      <-  '(' _ identifier ( ',' _ identifier)* ')' 
-						/   '(' _ ')'
-		functioncall                    <-  'print' _ '(' _ call_arguments _ ')'
-						/   variablereference _ '(' _ call_arguments _ ')'
-		call_arguments                  <-  (_ expr _ (',' _ expr)*)?
+		function_definition             <-  'fn' _ '(' _ (identifier ( ',' _ identifier)*)? ')'  _ block
+		functioncall                    <-  variablereference _ '(' (_ expr _ (',' _ expr)*)? _ ')'
 		block                           <-  '{' (_ statement _)* '}'
 		
 		ifexpression                    <-  'if' _ expr _ block _ ('else' _ block)? _
 		variablereference               <-  identifier
-		primary                         <-  variablereference
-						/   functioncall
+		primary                         <-  functioncall
+						/   variablereference
 						/   number
 						/   '(' _ arithmetic_expression _ ')'
 		comment                         <-  '#' [''""``-+0-9|a-zA-Z=>< ]* '\n'?
 		~_                              <-  [ \t\r\n]*
-		identifier                      <-  < [a-z] >
+		identifier                      <-  < [a-z][a-zA-Z0-9]* >
 		number                         	<-  < ('-')? [0-9]+ > 
 		add_op                          <-  < '+' / '-' > 
 		mul_op                          <-  < '*' / '/' > 
@@ -101,6 +97,26 @@ AstNode *bind(const SemanticValues &sv) {
 	return new Block(vec, j);
 }
 
+AstNode *funDef(const SemanticValues &sv) {
+	vector<AstNode*> vars;
+	AstNode* block;
+	for (auto i = 0u; i < sv.size()-1u; i+=1) {
+		vars.push_back(sv[i].get<ParseTreeNode>().get());
+	}
+	block = sv[sv.size()-1u].get<ParseTreeNode>().get();
+	return new FunDef(block, vars);
+
+}
+
+AstNode *funCall(const SemanticValues &sv) {
+	AstNode* ref = sv[0].get<ParseTreeNode>().get();
+	vector<AstNode*> vars;
+	for (auto i = 1u; i < sv.size(); i+=1) {
+		vars.push_back(sv[i].get<ParseTreeNode>().get());
+	}
+	return new FunCall(vars, ref);
+}
+
 void setup_ast_generation(parser &parser) {
 
 	parser["vDec"] = [](const SemanticValues &sv) {
@@ -157,32 +173,9 @@ void setup_ast_generation(parser &parser) {
 		return ParseTreeNode(new OpNode(sv.str()));
 	};
 
-    /*parser["function_definition"] = [](const SemanticValues &sv) {
-	would remove fn and things maybe?
-	
-    };*/
-
-    /*parser["param_list"] = [](const SemanticValues &sv) {
-	run through all identifiers?
-	
-    };*/
-
-	/*parser["functioncall"] = [](const SemanticValues &sv) {
-		
-		
-	};*/
-
-    /*parser["call_arguments"] = [](const SemanticValues &sv) {
-	bind values to function name values in new scope
-	
-    };*/
 
 	parser["block"] = [](const SemanticValues &sv) {
 		AstNode *n = bind(sv);
-		/*ParseTreeNode val = ParseTreeNode(n);
-		Interpreter* I = new Interpreter();
-		val.get()->accept(I);
-		return val;*/
 		return ParseTreeNode(n);
 	};
 
@@ -192,6 +185,21 @@ void setup_ast_generation(parser &parser) {
 		Interpreter* I = new Interpreter();
 		val.get()->accept(I);
 		return val;
+	};
+
+	parser["function_definition"] = [](const SemanticValues &sv) {
+		cout << "functiondefinition" << endl;
+		AstNode *n = funDef(sv);
+		return ParseTreeNode(n);
+	
+	};
+
+	parser["functioncall"] = [](const SemanticValues &sv) {
+		cout << "functioncall" << endl;
+		AstNode *n = funCall(sv);
+		ParseTreeNode val = ParseTreeNode(n);
+		return val;
+		
 	};
 
 }
@@ -206,17 +214,6 @@ int main(int argc, const char **argv) {
 	setup_ast_generation(parser);
 
 	ParseTreeNode val = ParseTreeNode();
-/*	Interpreter* I = new Interpreter();
-	for (int i = 1; i < argc; i++) {
-		auto expr = argv[i];
-		if (parser.parse(expr, val)) {
-			cout << val.get()->accept(I) << " is the final answer." << endl;
-		} else {
-			cout << "syntax error..." << endl;
-			return -1;
-		}
-	}*/
-
 	auto expr = argv[1];
 	if (parser.parse(expr, val)) {
 		//cout << val.get()->to_string() << endl;
