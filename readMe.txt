@@ -55,3 +55,21 @@
 	Start/Issues:
 		- Functions
 
+
+11/25/2019 9:27
+	Working:
+		- Ints
+		- Comparisons
+		- variablereference
+		- assignments
+		- variable declaration
+		- more than one code statement result
+		- if/else
+	Fix:
+		- Math where var equals itself with math
+		- Function using param values
+		- Function with empty param list
+		- Double printing at times
+	Start/Issues
+		- Segfault with functions involving variables passed in
+		- Segfault with functions involving no params
